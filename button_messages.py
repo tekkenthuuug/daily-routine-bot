@@ -1,0 +1,5 @@
+ADD_TASK_MESSAGE = "🗒  Add"
+REMOVE_TASK_MESSAGE = "💥  Remove"
+VIEW_TASKS_MESSAGE = "📋 View tasks"
+CONFIRM_MESSAGE = "✅ Confirm"
+CANCEL_MESSAGE = "❌ Cancel"

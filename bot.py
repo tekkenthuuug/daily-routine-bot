@@ -1,38 +1,18 @@
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, ConversationHandler
 from dotenv import load_dotenv
-load_dotenv()
+import button_messages
+import keyboard_markups;
 
+load_dotenv()
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-ADD_TASK_MESSAGE = "🗒  Add"
-CONFIRM_MESSAGE = "Confirm"
-CANCEL_MESSAGE = "Cancel"
 
 SET_TASK_NAME, CONFIRMATION = range(2)
-
-main_keyboard_markup = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(ADD_TASK_MESSAGE),
-            ]
-        ],
-        resize_keyboard=True
-    )
-
-confirmation_keyboard_markup = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(CONFIRM_MESSAGE),
-            KeyboardButton(CANCEL_MESSAGE),
-        ]
-    ],
-    resize_keyboard=True,
-)
 
 
 def format_task(task_data) -> str:
@@ -41,11 +21,13 @@ def format_task(task_data) -> str:
 
 def handle_start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(f'Hello, {update.effective_user.first_name}. I will remind you about your daily routine',
-                              reply_markup=main_keyboard_markup)
+                              reply_markup=keyboard_markups.main)
 
 
 def request_task_description(update: Update, context: CallbackContext) -> int:
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Type in task description:")
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Describe your task...",
+                             reply_markup=keyboard_markups.cancellation)
 
     return SET_TASK_NAME
 
@@ -56,22 +38,24 @@ def set_task_name(update: Update, context: CallbackContext) -> int:
     user_data = context.user_data
 
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=f"Here is your task: {format_task(user_data)} Is everything OK?",
-                             reply_markup=confirmation_keyboard_markup)
+                             text=f"Here is a summary on your task: {format_task(user_data)}"
+                                  f" {button_messages.CONFIRM_MESSAGE}"
+                                  f" or {button_messages.CANCEL_MESSAGE} it",
+                             reply_markup=keyboard_markups.confirmation)
 
     return CONFIRMATION
 
 
 def add_task(update: Update, context: CallbackContext) -> None:
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Task has been added!",
-                             reply_markup=main_keyboard_markup)
+    context.bot.send_message(chat_id=update.effective_chat.id, text="✅ Task has been added!",
+                             reply_markup=keyboard_markups.main)
 
     return ConversationHandler.END
 
 
 def cancel_add_task(update: Update, context: CallbackContext) -> None:
     context.bot.send_message(chat_id=update.effective_chat.id, text="Anyway, you can add it anytime!",
-                             reply_markup=main_keyboard_markup)
+                             reply_markup=keyboard_markups.main)
 
     return ConversationHandler.END
 
@@ -82,13 +66,15 @@ def main():
     start_handler = CommandHandler('start', handle_start)
 
     add_task_conversation_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex(ADD_TASK_MESSAGE), request_task_description)],
+        entry_points=[MessageHandler(Filters.regex(button_messages.ADD_TASK_MESSAGE), request_task_description)],
         states={
-            SET_TASK_NAME: [MessageHandler(Filters.text, set_task_name)],
-            CONFIRMATION: [MessageHandler(Filters.regex(CONFIRM_MESSAGE), add_task),
-                           MessageHandler(Filters.regex(CANCEL_MESSAGE), cancel_add_task)],
+            SET_TASK_NAME: [MessageHandler(Filters.text & ~Filters.command &
+                                           ~Filters.regex(button_messages.CANCEL_MESSAGE), set_task_name)],
+            CONFIRMATION: [MessageHandler(Filters.regex(button_messages.CONFIRM_MESSAGE), add_task),
+                           MessageHandler(Filters.regex(button_messages.CANCEL_MESSAGE), cancel_add_task)],
         },
-        fallbacks=[CommandHandler('cancel', cancel_add_task)]
+        fallbacks=[CommandHandler('cancel', cancel_add_task),
+                   MessageHandler(Filters.regex(button_messages.CANCEL_MESSAGE), cancel_add_task)]
     )
 
     dispatcher = updater.dispatcher
