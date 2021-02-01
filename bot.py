@@ -3,9 +3,7 @@ import logging
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, ConversationHandler
 from dotenv import load_dotenv
-import button_message
-import keyboard_markup
-import emoji
+from utils import emoji, keyboard_markup, button_message
 
 load_dotenv()
 

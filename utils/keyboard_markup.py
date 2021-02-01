@@ -1,5 +1,5 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup
-import button_message
+from utils import button_message
 
 cancellation = ReplyKeyboardMarkup(
     keyboard=[
@@ -13,10 +13,11 @@ cancellation = ReplyKeyboardMarkup(
 main = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(button_message.ADD_TASK_MESSAGE)
+            KeyboardButton(button_message.VIEW_TASKS_MESSAGE),
         ],
         [
-            KeyboardButton(button_message.VIEW_TASKS_MESSAGE),
+            KeyboardButton(button_message.ADD_TASK_MESSAGE),
+            KeyboardButton(button_message.EDIT_TASK_MESSAGE)
         ]
     ],
     resize_keyboard=True
