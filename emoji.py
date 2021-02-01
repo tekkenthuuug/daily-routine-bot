@@ -1,0 +1,6 @@
+red_circle = '\U0001f534'
+green_circle = '\U0001f7e2'
+clipboard = '\U0001f4cb'
+note = '\U0001f5d2\uFE0F'
+check_mark = '\u2705'
+cross_mark = '\u274C'
