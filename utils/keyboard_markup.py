@@ -17,7 +17,7 @@ main = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(button_message.ADD_TASK_MESSAGE),
-            KeyboardButton(button_message.EDIT_TASK_MESSAGE)
+            KeyboardButton(button_message.EDIT_TASKS_MESSAGE)
         ]
     ],
     resize_keyboard=True
