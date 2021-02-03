@@ -1,4 +1,4 @@
-from utils import emoji
+from util import emoji
 
 ADD_TASK_MESSAGE = f"{emoji.note}  Add"
 EDIT_TASKS_MESSAGE = f"{emoji.pencil}  Edit"

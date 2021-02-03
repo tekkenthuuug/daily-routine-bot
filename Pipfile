@@ -9,6 +9,7 @@ sqlalchemy = "*"
 marshmallow-sqlalchemy = "*"
 python-telegram-bot = "*"
 python-dotenv = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
