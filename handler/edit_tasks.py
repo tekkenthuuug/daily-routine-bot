@@ -7,7 +7,7 @@ from model.userTask import UserTask
 TASKS_ON_PAGE = 4
 
 
-def create_edit_tasks_markup(user_tasks, page_no, has_next=False, has_prev=False):
+def create_manage_tasks_markup(user_tasks, page_no, has_next=False, has_prev=False):
     inline_keyboard_markup = InlineKeyboardMarkup([])
 
     user_tasks_length = len(user_tasks)
@@ -44,7 +44,7 @@ def create_edit_tasks_markup(user_tasks, page_no, has_next=False, has_prev=False
     return inline_keyboard_markup
 
 
-def list_edit_tasks_page(update: Update, context: CallbackContext) -> None:
+def change_manage_tasks_page(update: Update, context: CallbackContext) -> None:
     user_id = update.callback_query.from_user.id
 
     callback_query = update.callback_query
@@ -68,7 +68,7 @@ def list_edit_tasks_page(update: Update, context: CallbackContext) -> None:
 
     session.commit()
 
-    inline_keyboard_markup = create_edit_tasks_markup(user_tasks, page_no, has_next, page_no > 0)
+    inline_keyboard_markup = create_manage_tasks_markup(user_tasks, page_no, has_next, page_no > 0)
 
     context.bot.edit_message_reply_markup(chat_id=update.effective_chat.id,
                                           message_id=update.callback_query.message.message_id,
@@ -77,7 +77,7 @@ def list_edit_tasks_page(update: Update, context: CallbackContext) -> None:
     update.callback_query.answer()
 
 
-def list_edit_tasks(update: Update, context: CallbackContext) -> None:
+def list_manage_tasks(update: Update, context: CallbackContext) -> None:
     user_id = update.message.from_user.id
 
     session = Session()
@@ -96,7 +96,7 @@ def list_edit_tasks(update: Update, context: CallbackContext) -> None:
         user_tasks.pop()
         has_next = True
 
-    inline_keyboard_markup = create_edit_tasks_markup(user_tasks, 0, has_next, False)
+    inline_keyboard_markup = create_manage_tasks_markup(user_tasks, 0, has_next, False)
 
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Here is the list of your tasks:\n\n*You can toggle task by clicking on it*",
@@ -104,7 +104,7 @@ def list_edit_tasks(update: Update, context: CallbackContext) -> None:
                              parse_mode=ParseMode.MARKDOWN)
 
 
-def edit_task(update: Update, context: CallbackContext) -> None:
+def toggle_task(update: Update, context: CallbackContext) -> None:
     user_id = update.callback_query.from_user.id
     callback_query = update.callback_query
     message_keyboard_markup = callback_query.message.reply_markup.inline_keyboard
@@ -135,6 +135,6 @@ def edit_task(update: Update, context: CallbackContext) -> None:
     update.callback_query.answer()
 
 
-edit_tasks_handler = MessageHandler(Filters.regex(button_message.MANAGE_TASKS_MESSAGE), list_edit_tasks)
-callback_edit_task_handler = CallbackQueryHandler(edit_task, pattern=r'^UserTask_toggle:')
-callback_tasks_page_handler = CallbackQueryHandler(list_edit_tasks_page, pattern=r'^UserTask_page:')
+edit_tasks_handler = MessageHandler(Filters.regex(button_message.MANAGE_TASKS_MESSAGE), list_manage_tasks)
+callback_edit_task_handler = CallbackQueryHandler(toggle_task, pattern=r'^UserTask_toggle:')
+callback_tasks_page_handler = CallbackQueryHandler(change_manage_tasks_page, pattern=r'^UserTask_page:')
