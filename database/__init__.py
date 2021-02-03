@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-db_engine = create_engine(os.getenv('POSTGRES_URI'), echo=True)
+db_engine = create_engine(os.getenv('POSTGRES_URI'))
 
 Session = sessionmaker(bind=db_engine)
 

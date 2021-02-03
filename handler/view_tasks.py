@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import CallbackContext, MessageHandler, Filters
-from util import keyboard_markup, button_message, format
+from util import button_message, format
 from database import Session
 from model.userTask import UserTask
 
@@ -8,7 +8,7 @@ from model.userTask import UserTask
 def view_tasks(update: Update, context: CallbackContext) -> None:
     user_id = update.message.from_user.id
 
-    result = ""
+    text = ""
 
     session = Session()
 
@@ -16,14 +16,15 @@ def view_tasks(update: Update, context: CallbackContext) -> None:
 
     session.commit()
 
-    if len(user_tasks) > 0:
-        for i in range(len(user_tasks)):
-            result += format.task({'description': user_tasks[i].description, 'completed': user_tasks[i].completed})
+    user_tasks_length = len(user_tasks)
+
+    if user_tasks_length > 0:
+        for i in range(user_tasks_length):
+            text += format.task(user_tasks[i])
     else:
-        result = "You don't have any tasks yet!"
+        text = "You don't have any tasks yet!"
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=result,
-                             reply_markup=keyboard_markup.main)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 
 
-view_tasks_handler = MessageHandler(Filters.regex(button_message.VIEW_TASKS_MESSAGE), view_tasks)
+view_tasks_handler = MessageHandler(Filters.regex(button_message.LIST_TASKS_MESSAGE), view_tasks)
