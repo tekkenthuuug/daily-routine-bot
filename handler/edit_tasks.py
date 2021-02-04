@@ -29,12 +29,12 @@ def create_manage_tasks_markup(user_tasks, page_no, has_next=False, has_prev=Fal
 
             if has_prev:
                 page_buttons.append(
-                    InlineKeyboardButton(text="< Prev", callback_data=f"UserTask_page:{page_no - 1}")
+                    InlineKeyboardButton(text=button_message.PREV_MESSAGE, callback_data=f"UserTask_page:{page_no - 1}")
                 )
 
             if has_next:
                 page_buttons.append(
-                    InlineKeyboardButton(text="Next >", callback_data=f"UserTask_page:{page_no + 1}")
+                    InlineKeyboardButton(text=button_message.NEXT_MESSAGE, callback_data=f"UserTask_page:{page_no + 1}")
                 )
 
             buttons.append(page_buttons)
@@ -56,7 +56,7 @@ def change_manage_tasks_page(update: Update, context: CallbackContext) -> None:
     has_next = False
 
     user_tasks = session.query(UserTask) \
-        .filter(UserTask.user_id == user_id) \
+        .filter(UserTask.tg_user_id == user_id) \
         .order_by(UserTask.created_at) \
         .offset(page_no * TASKS_ON_PAGE) \
         .limit(TASKS_ON_PAGE + 1) \
@@ -83,7 +83,7 @@ def list_manage_tasks(update: Update, context: CallbackContext) -> None:
     session = Session()
 
     user_tasks = session.query(UserTask) \
-        .filter(UserTask.user_id == user_id) \
+        .filter(UserTask.tg_user_id == user_id) \
         .order_by(UserTask.created_at) \
         .limit(TASKS_ON_PAGE + 1) \
         .all()
@@ -116,7 +116,7 @@ def toggle_task(update: Update, context: CallbackContext) -> None:
 
             user_task = session.query(UserTask)\
                 .filter(UserTask.id == task_id)\
-                .filter(UserTask.user_id == user_id)\
+                .filter(UserTask.tg_user_id == user_id)\
                 .first()
 
             user_task.completed = not user_task.completed

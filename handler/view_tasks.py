@@ -12,7 +12,7 @@ def view_tasks(update: Update, context: CallbackContext) -> None:
 
     session = Session()
 
-    user_tasks = session.query(UserTask).filter(UserTask.user_id == user_id).order_by(UserTask.completed).all()
+    user_tasks = session.query(UserTask).filter(UserTask.tg_user_id == user_id).order_by(UserTask.completed).all()
 
     session.commit()
 

@@ -10,6 +10,8 @@ marshmallow-sqlalchemy = "*"
 python-telegram-bot = "*"
 python-dotenv = "*"
 psycopg2 = "*"
+timezonefinder = "*"
+pytz = "*"
 
 [dev-packages]
 

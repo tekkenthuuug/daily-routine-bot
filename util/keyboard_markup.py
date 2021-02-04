@@ -10,6 +10,15 @@ cancellation = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+skip = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(button_message.SKIP_MESSAGE),
+        ]
+    ],
+    resize_keyboard=True
+)
+
 main = ReplyKeyboardMarkup(
     keyboard=[
         [
