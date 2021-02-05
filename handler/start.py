@@ -9,12 +9,24 @@ LOCATION, CONFIRMATION = range(2)
 
 
 def greeting(update: Update, context: CallbackContext) -> int:
+    user_id = update.message.from_user.id
+
     update.message.reply_text(f'Hello, {update.effective_user.first_name}. I will remind you about your daily routine.'
                               f'\n\nIn order to reset your tasks daily and send notifications,'
                               f' we need to know your location.\n\n*You location won\'t be saved,'
                               f' only timezone, however this step is completely optional*',
                               reply_markup=keyboard_markup.skip,
                               parse_mode=ParseMode.MARKDOWN)
+
+    session = Session()
+
+    existing_user: User = session.query(User).filter(User.tg_user_id == user_id).first()
+
+    if existing_user is None:
+        user = User(tg_user_id=user_id)
+        session.add(user)
+
+    session.commit()
 
     return LOCATION
 
@@ -34,19 +46,14 @@ def handle_location(update: Update, context: CallbackContext) -> int:
     return CONFIRMATION
 
 
-def save_location(update: Update, context: CallbackContext) -> int:
+def save_utc_offset(update: Update, context: CallbackContext) -> int:
     user_id = update.message.from_user.id
 
     session = Session()
 
-    existing_user: User = session.query(User).filter(User.tg_user_id == user_id).first()
     user_utc_offset = context.user_data['utcoffset']
 
-    if existing_user is None:
-        user = User(tg_user_id=user_id, utc_offset=user_utc_offset)
-        session.add(user)
-    else:
-        existing_user.utc_offset = user_utc_offset
+    session.query(User).filter(User.tg_user_id == user_id).update({User.utc_offset: user_utc_offset})
 
     session.commit()
 
@@ -67,7 +74,7 @@ start_handler = ConversationHandler(
     entry_points=[CommandHandler('start', greeting)],
     states={
         LOCATION: [MessageHandler(Filters.location, handle_location)],
-        CONFIRMATION: [MessageHandler(Filters.regex(button_message.YES_MESSAGE), save_location),
+        CONFIRMATION: [MessageHandler(Filters.regex(button_message.YES_MESSAGE), save_utc_offset),
                        MessageHandler(Filters.regex(button_message.NO_MESSAGE), skip)]
     },
     fallbacks=[CommandHandler('cancel', skip),

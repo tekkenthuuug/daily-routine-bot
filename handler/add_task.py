@@ -50,7 +50,7 @@ def add_task(update: Update, context: CallbackContext) -> None:
 
     user_task = UserTask(description=context.user_data.get('description'),
                          completed=context.user_data.get('completed'),
-                         user_id=user_id)
+                         tg_user_id=user_id)
 
     session.add(user_task)
     session.commit()
