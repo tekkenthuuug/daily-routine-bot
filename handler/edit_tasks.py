@@ -26,8 +26,12 @@ def list_manage_tasks(update: Update, context: CallbackContext) -> None:
 
     inline_keyboard_markup = create_tasks_keyboard_markup(user_id, 0, "toggle")
 
+    text = f"{message.TASKS_LIST}\n\n*You can toggle task by clicking on it*"
+    if len(inline_keyboard_markup.inline_keyboard) <= 0:
+        text = message.NO_TASKS
+
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=f"{message.TASKS_LIST}\n\n*You can toggle task by clicking on it*",
+                             text=text,
                              reply_markup=inline_keyboard_markup,
                              parse_mode=ParseMode.MARKDOWN)
 
@@ -47,12 +51,14 @@ def toggle_task(update: Update, context: CallbackContext) -> None:
                 .filter(UserTask.tg_user_id == user_id)\
                 .first()
 
-            user_task.completed = not user_task.completed
+            if user_task is not None:
+                user_task.completed = not user_task.completed
+                message_keyboard_markup[i][0] = \
+                    InlineKeyboardButton(format.task(user_task), callback_data=f"UserTask_toggle_click:{user_task.id}")
+            else:
+                del message_keyboard_markup[i]
 
             session.commit()
-
-            message_keyboard_markup[i][0] = InlineKeyboardButton(format.task(user_task),
-                                                                 callback_data=f"UserTask_toggle:{user_task.id}")
 
             break
 

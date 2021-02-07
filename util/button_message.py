@@ -2,8 +2,8 @@ from util import emoji
 
 ADD_TASK_MESSAGE = f"{emoji.note}  Add"
 REMOVE_TASK_MESSAGE = f"{emoji.cross_mark}  Remove"
-MANAGE_TASKS_MESSAGE = f"{emoji.pencil}  Manage tasks"
-LIST_TASKS_MESSAGE = f"{emoji.clipboard}  List tasks"
+MANAGE_TASKS_MESSAGE = f"{emoji.pencil}  Manage"
+LIST_TASKS_MESSAGE = f"{emoji.clipboard}  List"
 CANCEL_MESSAGE = f"{emoji.cross_mark}  Cancel"
 YES_MESSAGE = f"{emoji.green_circle}  Yes"
 NO_MESSAGE = f"{emoji.red_circle}  No"

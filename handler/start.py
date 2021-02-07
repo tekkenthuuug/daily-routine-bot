@@ -1,20 +1,17 @@
 from telegram import Update, ParseMode
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
-from util import keyboard_markup, button_message, time
+from util import keyboard_markup, button_message, time, message, format
 from database import Session
 from model.user import User
 
 
-LOCATION, CONFIRMATION = range(2)
+TIMEZONE, CONFIRMATION = range(2)
 
 
 def greeting(update: Update, context: CallbackContext) -> int:
     user_id = update.message.from_user.id
 
-    update.message.reply_text(f'Hello, {update.effective_user.first_name}. I will remind you about your daily routine.'
-                              f'\n\nIn order to reset your tasks daily and send notifications,'
-                              f' we need to know your location.\n\n*You location won\'t be saved,'
-                              f' only timezone, however this step is completely optional*',
+    update.message.reply_text(f'Hello, {update.effective_user.first_name}. {message.START}',
                               reply_markup=keyboard_markup.skip,
                               parse_mode=ParseMode.MARKDOWN)
 
@@ -28,7 +25,7 @@ def greeting(update: Update, context: CallbackContext) -> int:
 
     session.commit()
 
-    return LOCATION
+    return TIMEZONE
 
 
 def handle_location(update: Update, context: CallbackContext) -> int:
@@ -40,10 +37,32 @@ def handle_location(update: Update, context: CallbackContext) -> int:
 
     context.user_data['utcoffset'] = user_utcoffset
 
-    update.message.reply_text(f'Your location is: {user_timezone_name} (UTC {user_utcoffset})',
+    update.message.reply_text(f'Your location is: {user_timezone_name} ({format.to_utc_string(user_utcoffset)})',
                               reply_markup=keyboard_markup.confirmation)
 
     return CONFIRMATION
+
+
+def handle_utc_offset(update: Update, context: CallbackContext) -> int:
+    text = update.message.text
+
+    try:
+        user_utc_offset = int(text)
+
+        if user_utc_offset > 12 or user_utc_offset < -11:
+            update.message.reply_text(f'{format.to_utc_string(user_utc_offset)} is not a valid timezone')
+            return TIMEZONE
+        else:
+            context.user_data['utcoffset'] = user_utc_offset
+
+            update.message.reply_text(f'Your timezone is: {format.to_utc_string(user_utc_offset)}',
+                                      reply_markup=keyboard_markup.confirmation)
+
+            return CONFIRMATION
+    except ValueError:
+        update.message.reply_text(f'Please, provide me a valid UTC offset to continue')
+
+        return TIMEZONE
 
 
 def save_utc_offset(update: Update, context: CallbackContext) -> int:
@@ -73,7 +92,8 @@ def skip(update: Update, context: CallbackContext) -> None:
 start_handler = ConversationHandler(
     entry_points=[CommandHandler('start', greeting)],
     states={
-        LOCATION: [MessageHandler(Filters.location, handle_location)],
+        TIMEZONE: [MessageHandler(Filters.location, handle_location),
+                   MessageHandler(Filters.text, handle_utc_offset)],
         CONFIRMATION: [MessageHandler(Filters.regex(button_message.YES_MESSAGE), save_utc_offset),
                        MessageHandler(Filters.regex(button_message.NO_MESSAGE), skip)]
     },
