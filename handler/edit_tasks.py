@@ -1,74 +1,18 @@
 from telegram.ext import MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from util import button_message, format
+from util import button_message, format, message
 from database import Session
 from model.userTask import UserTask
-
-TASKS_ON_PAGE = 4
-
-
-def create_manage_tasks_markup(user_tasks, page_no, has_next=False, has_prev=False):
-    inline_keyboard_markup = InlineKeyboardMarkup([])
-
-    user_tasks_length = len(user_tasks)
-
-    if user_tasks_length > 0:
-        buttons = []
-
-        for i in range(user_tasks_length):
-            user_task = user_tasks[i]
-
-            buttons.append(
-                [
-                    InlineKeyboardButton(text=format.task(user_task), callback_data=f"UserTask_toggle:{user_task.id}")
-                ]
-            )
-
-        if has_prev or has_next:
-            page_buttons = []
-
-            if has_prev:
-                page_buttons.append(
-                    InlineKeyboardButton(text=button_message.PREV_MESSAGE, callback_data=f"UserTask_page:{page_no - 1}")
-                )
-
-            if has_next:
-                page_buttons.append(
-                    InlineKeyboardButton(text=button_message.NEXT_MESSAGE, callback_data=f"UserTask_page:{page_no + 1}")
-                )
-
-            buttons.append(page_buttons)
-
-        inline_keyboard_markup = InlineKeyboardMarkup(buttons)
-
-    return inline_keyboard_markup
+from util.create_tasks_keyboard_markup import create_tasks_keyboard_markup
 
 
 def change_manage_tasks_page(update: Update, context: CallbackContext) -> None:
     user_id = update.callback_query.from_user.id
 
-    callback_query = update.callback_query
-    event, page_str = callback_query.data.split(":")
+    event, page_str = update.callback_query.data.split(":")
     page_no = int(page_str)
 
-    session = Session()
-
-    has_next = False
-
-    user_tasks = session.query(UserTask) \
-        .filter(UserTask.tg_user_id == user_id) \
-        .order_by(UserTask.created_at) \
-        .offset(page_no * TASKS_ON_PAGE) \
-        .limit(TASKS_ON_PAGE + 1) \
-        .all()
-
-    if len(user_tasks) > TASKS_ON_PAGE:
-        user_tasks.pop()
-        has_next = True
-
-    session.commit()
-
-    inline_keyboard_markup = create_manage_tasks_markup(user_tasks, page_no, has_next, page_no > 0)
+    inline_keyboard_markup = create_tasks_keyboard_markup(user_id, page_no, "toggle")
 
     context.bot.edit_message_reply_markup(chat_id=update.effective_chat.id,
                                           message_id=update.callback_query.message.message_id,
@@ -80,26 +24,10 @@ def change_manage_tasks_page(update: Update, context: CallbackContext) -> None:
 def list_manage_tasks(update: Update, context: CallbackContext) -> None:
     user_id = update.message.from_user.id
 
-    session = Session()
-
-    user_tasks = session.query(UserTask) \
-        .filter(UserTask.tg_user_id == user_id) \
-        .order_by(UserTask.created_at) \
-        .limit(TASKS_ON_PAGE + 1) \
-        .all()
-
-    session.commit()
-
-    has_next = False
-
-    if len(user_tasks) > TASKS_ON_PAGE:
-        user_tasks.pop()
-        has_next = True
-
-    inline_keyboard_markup = create_manage_tasks_markup(user_tasks, 0, has_next, False)
+    inline_keyboard_markup = create_tasks_keyboard_markup(user_id, 0, "toggle")
 
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Here is the list of your tasks:\n\n*You can toggle task by clicking on it*",
+                             text=f"{message.TASKS_LIST}\n\n*You can toggle task by clicking on it*",
                              reply_markup=inline_keyboard_markup,
                              parse_mode=ParseMode.MARKDOWN)
 
@@ -136,5 +64,5 @@ def toggle_task(update: Update, context: CallbackContext) -> None:
 
 
 edit_tasks_handler = MessageHandler(Filters.regex(button_message.MANAGE_TASKS_MESSAGE), list_manage_tasks)
-callback_edit_task_handler = CallbackQueryHandler(toggle_task, pattern=r'^UserTask_toggle:')
-callback_tasks_page_handler = CallbackQueryHandler(change_manage_tasks_page, pattern=r'^UserTask_page:')
+callback_edit_task_handler = CallbackQueryHandler(toggle_task, pattern=r'^UserTask_toggle_click:')
+callback_tasks_page_handler = CallbackQueryHandler(change_manage_tasks_page, pattern=r'^UserTask_toggle_page:')

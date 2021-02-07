@@ -6,6 +6,7 @@ from handler.add_task import add_task_handler
 from handler.view_tasks import view_tasks_handler
 from handler.start import start_handler
 from handler.edit_tasks import edit_tasks_handler, callback_edit_task_handler, callback_tasks_page_handler
+from handler.remove_task import callback_remove_task_handler, callback_remove_tasks_page_handler, remove_tasks_handler
 from dotenv import load_dotenv
 from datetime import datetime
 from jobs import reset_tasks_completed
@@ -32,8 +33,11 @@ def main():
     dispatcher.add_handler(add_task_handler)
     dispatcher.add_handler(view_tasks_handler)
     dispatcher.add_handler(edit_tasks_handler)
+    dispatcher.add_handler(remove_tasks_handler)
     dispatcher.add_handler(callback_edit_task_handler)
     dispatcher.add_handler(callback_tasks_page_handler)
+    dispatcher.add_handler(callback_remove_tasks_page_handler)
+    dispatcher.add_handler(callback_remove_task_handler)
 
     updater.start_polling()
     updater.idle()

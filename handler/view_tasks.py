@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext, MessageHandler, Filters
 from util import button_message, format
 from database import Session
 from model.userTask import UserTask
+from util import message
 
 
 def view_tasks(update: Update, context: CallbackContext) -> None:
@@ -22,7 +23,7 @@ def view_tasks(update: Update, context: CallbackContext) -> None:
         for i in range(user_tasks_length):
             text += format.task(user_tasks[i])
     else:
-        text = "You don't have any tasks yet!"
+        text = message.NO_TASKS
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 

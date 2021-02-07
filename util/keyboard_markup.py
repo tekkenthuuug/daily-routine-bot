@@ -22,11 +22,12 @@ skip = ReplyKeyboardMarkup(
 main = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(button_message.MANAGE_TASKS_MESSAGE)
+            KeyboardButton(button_message.LIST_TASKS_MESSAGE),
         ],
         [
             KeyboardButton(button_message.ADD_TASK_MESSAGE),
-            KeyboardButton(button_message.LIST_TASKS_MESSAGE),
+            KeyboardButton(button_message.MANAGE_TASKS_MESSAGE),
+            KeyboardButton(button_message.REMOVE_TASK_MESSAGE)
         ]
     ],
     resize_keyboard=True
