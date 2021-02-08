@@ -47,6 +47,7 @@ def handle_utc_offset(update: Update, context: CallbackContext) -> int:
     text = update.message.text
 
     try:
+        print(text)
         user_utc_offset = int(text)
 
         if user_utc_offset > 12 or user_utc_offset < -11:
@@ -82,7 +83,7 @@ def save_utc_offset(update: Update, context: CallbackContext) -> int:
 
 
 def skip(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text(f'*You can change your location later in settings*',
+    update.message.reply_text(f'*You can change your timezone later in settings*',
                               reply_markup=keyboard_markup.main,
                               parse_mode=ParseMode.MARKDOWN)
 
@@ -93,7 +94,7 @@ start_handler = ConversationHandler(
     entry_points=[CommandHandler('start', greeting)],
     states={
         TIMEZONE: [MessageHandler(Filters.location, handle_location),
-                   MessageHandler(Filters.text, handle_utc_offset)],
+                   MessageHandler(Filters.text & ~Filters.regex(button_message.SKIP_MESSAGE), handle_utc_offset)],
         CONFIRMATION: [MessageHandler(Filters.regex(button_message.YES_MESSAGE), save_utc_offset),
                        MessageHandler(Filters.regex(button_message.NO_MESSAGE), skip)]
     },

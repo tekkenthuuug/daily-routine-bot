@@ -9,7 +9,7 @@ from handler.edit_tasks import edit_tasks_handler, callback_edit_task_handler, c
 from handler.remove_task import callback_remove_task_handler, callback_remove_tasks_page_handler, remove_tasks_handler
 from dotenv import load_dotenv
 from datetime import datetime
-from jobs import reset_tasks_completed
+from jobs import reset_tasks_completed, remind_about_tasks
 
 load_dotenv()
 
@@ -24,8 +24,9 @@ def main():
     jq = updater.job_queue
 
     utc_now_full = datetime.utcnow()
-    first_reset_task_time = datetime(utc_now_full.year, utc_now_full.month, utc_now_full.day, utc_now_full.hour + 1)
-    jq.run_repeating(reset_tasks_completed, interval=3600, first=first_reset_task_time)
+    next_hour_datetime = datetime(utc_now_full.year, utc_now_full.month, utc_now_full.day, utc_now_full.hour + 1)
+    jq.run_repeating(reset_tasks_completed, interval=3600, first=next_hour_datetime)
+    jq.run_repeating(remind_about_tasks, interval=3600, first=1)
 
     dispatcher = updater.dispatcher
 

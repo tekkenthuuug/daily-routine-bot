@@ -6,3 +6,5 @@ START = 'I will remind you about your daily routine. \n\nIn order to reset your 
         'I need to know your timezone. \n\nYou can send to me your location or UTC offset itself.\n\n' \
         'Offset examples: \nUTC+1 - offset 1\nUTC-1 - offset -1\nUTC+0 - offset 0 \n\n' \
         '*In case of sending location only your timezone would be saved.*'
+BAD_RATIO = "Pull yourself together!"
+GOOD_RATIO = "You are doing great, keep up a good pace!"

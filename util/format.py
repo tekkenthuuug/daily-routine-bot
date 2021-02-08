@@ -1,5 +1,6 @@
 from util import emoji
 from dataclasses import asdict
+from decimal import Decimal
 
 
 def task(task_data) -> str:
@@ -9,7 +10,13 @@ def task(task_data) -> str:
     return f"\n{icon} {task_dict['description']}\n"
 
 
-def to_utc_string(number):
+def to_percentage(number: float) -> str:
+    percentage = Decimal(number * 100).quantize(Decimal('.00'))
+
+    return f"%{percentage}"
+
+
+def to_utc_string(number: int) -> str:
     sign = emoji.plus_minus
 
     if number > 0:
