@@ -26,7 +26,7 @@ def main():
     utc_now_full = datetime.utcnow()
     next_hour_datetime = datetime(utc_now_full.year, utc_now_full.month, utc_now_full.day, utc_now_full.hour + 1)
     jq.run_repeating(reset_tasks_completed, interval=3600, first=next_hour_datetime)
-    jq.run_repeating(remind_about_tasks, interval=3600, first=1)
+    jq.run_repeating(remind_about_tasks, interval=3600, first=next_hour_datetime)
 
     dispatcher = updater.dispatcher
 
