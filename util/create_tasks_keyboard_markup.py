@@ -16,8 +16,6 @@ def create_tasks_keyboard_markup(user_id, page_no, scope):
         .limit(TASKS_ON_PAGE + 1) \
         .all()
 
-    session.commit()
-
     has_next = False
     has_prev = page_no > 0
 

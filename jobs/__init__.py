@@ -45,8 +45,6 @@ def remind_about_tasks(context: CallbackContext) -> None:
                 func.coalesce(tasks_completed_q.c.tasks_count, 0) < tasks_q.c.tasks_count) \
         .all()
 
-    session.commit()
-
     bot_messages = []
 
     def send_remind_about_task(params):
@@ -73,3 +71,8 @@ def remind_about_tasks(context: CallbackContext) -> None:
         bot_messages.append(message_tuple)
 
         call_bulk_with_throttling(func=send_remind_about_task, max_calls=25, sleep_time=2, args_arr=bot_messages)
+
+
+def run_hourly_jobs(context: CallbackContext) -> None:
+    remind_about_tasks(context)
+    reset_tasks_completed(context)

@@ -22,8 +22,7 @@ def greeting(update: Update, context: CallbackContext) -> int:
     if existing_user is None:
         user = User(tg_user_id=user_id)
         session.add(user)
-
-    session.commit()
+        session.commit()
 
     return TIMEZONE
 
@@ -47,7 +46,6 @@ def handle_utc_offset(update: Update, context: CallbackContext) -> int:
     text = update.message.text
 
     try:
-        print(text)
         user_utc_offset = int(text)
 
         if user_utc_offset > 12 or user_utc_offset < -11:
@@ -61,7 +59,7 @@ def handle_utc_offset(update: Update, context: CallbackContext) -> int:
 
             return CONFIRMATION
     except ValueError:
-        update.message.reply_text(f'Please, provide me a valid UTC offset to continue')
+        update.message.reply_text(f'Please, provide me with valid UTC offset to continue')
 
         return TIMEZONE
 

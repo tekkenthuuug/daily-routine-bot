@@ -55,10 +55,10 @@ def toggle_task(update: Update, context: CallbackContext) -> None:
                 user_task.completed = not user_task.completed
                 message_keyboard_markup[i][0] = \
                     InlineKeyboardButton(format.task(user_task), callback_data=f"UserTask_toggle_click:{user_task.id}")
+
+                session.commit()
             else:
                 del message_keyboard_markup[i]
-
-            session.commit()
 
             break
 
