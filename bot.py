@@ -40,6 +40,7 @@ def main():
     dispatcher.add_handler(callback_remove_task_handler)
 
     updater.start_polling()
+
     updater.idle()
 
 
