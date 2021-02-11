@@ -24,7 +24,7 @@ def main():
     jq = updater.job_queue
 
     utc_now_full = datetime.utcnow()
-    next_hour_datetime = datetime(utc_now_full.year, utc_now_full.month, utc_now_full.day, utc_now_full.hour + 1)
+    next_hour_datetime = datetime(utc_now_full.year, utc_now_full.month, utc_now_full.day, (utc_now_full.hour + 1) % 24)
     jq.run_repeating(run_hourly_jobs, interval=3600, first=next_hour_datetime)
 
     dispatcher = updater.dispatcher

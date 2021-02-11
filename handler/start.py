@@ -23,6 +23,8 @@ def greeting(update: Update, context: CallbackContext) -> int:
         user = User(tg_user_id=user_id)
         session.add(user)
         session.commit()
+    else:
+        session.close()
 
     return TIMEZONE
 

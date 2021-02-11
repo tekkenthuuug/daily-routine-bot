@@ -15,6 +15,8 @@ def view_tasks(update: Update, context: CallbackContext) -> None:
 
     user_tasks = session.query(UserTask).filter(UserTask.tg_user_id == user_id).order_by(UserTask.completed).all()
 
+    session.close()
+
     user_tasks_length = len(user_tasks)
 
     if user_tasks_length > 0:

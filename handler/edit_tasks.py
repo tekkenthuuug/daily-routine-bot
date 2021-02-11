@@ -59,6 +59,7 @@ def toggle_task(update: Update, context: CallbackContext) -> None:
                 session.commit()
             else:
                 del message_keyboard_markup[i]
+                session.close()
 
             break
 
