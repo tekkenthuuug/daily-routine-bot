@@ -9,8 +9,6 @@ from util import format, message
 import logging
 from sqlalchemy.sql import func
 
-logger = logging.getLogger()
-
 
 def reset_tasks_completed(context: CallbackContext) -> None:
     utc_timezone_offset = get_timezone_where_time(24)
@@ -26,6 +24,9 @@ def reset_tasks_completed(context: CallbackContext) -> None:
     session.commit()
 
 
+logger = logging.getLogger()
+
+
 def remind_about_tasks(context: CallbackContext) -> None:
     utc_timezone_offset = get_timezone_where_time(16)
 
@@ -39,16 +40,22 @@ def remind_about_tasks(context: CallbackContext) -> None:
 
     tasks_completed_q = base_stmt.filter(UserTask.completed).subquery()
 
-    users = session.query(User, tasks_q.c.tasks_count, tasks_completed_q.c.tasks_count) \
-        .outerjoin(tasks_completed_q, User.tg_user_id == tasks_completed_q.c.tg_user_id) \
+    users = session.query(User, tasks_q.c.tasks_count, tasks_completed_q.c.tasks_count)\
+        .join(tasks_q, User.tg_user_id == tasks_q.c.tg_user_id)\
+        .outerjoin(tasks_completed_q, User.tg_user_id == tasks_completed_q.c.tg_user_id)\
         .filter(User.utc_offset == utc_timezone_offset,
-                func.coalesce(tasks_completed_q.c.tasks_count, 0) < tasks_q.c.tasks_count) \
+                func.coalesce(tasks_completed_q.c.tasks_count, 0) < tasks_q.c.tasks_count)\
         .all()
+
+    session.close()
 
     bot_messages = []
 
     def send_remind_about_task(params):
         user_id, text = params
+
+        logger.log(level=logging.INFO, msg=f"Sending task reminder message for {user_id}")
+
         context.bot.send_message(
             chat_id=user_id,
             text=text,

@@ -7,12 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 db_engine = create_engine(os.getenv('DATABASE_URL'), echo=True)
-print(db_engine)
 
 Session = sessionmaker(bind=db_engine)
-print(Session)
-
-print('run')
 
 Base = declarative_base()
 
